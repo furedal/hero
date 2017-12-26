@@ -9,6 +9,10 @@ class Character < ApplicationRecord
         raise Exceptions::BadRequest.new "The characters must be next to each other, distance: #{distance}" unless distance == 1
         total_health = character.unit_health * (character.units - 1) + character.health - self.units * self.power
         units = (total_health/character.unit_health).ceil
+        if units <= 0 && total_health <= 0
+            units = 0
+            total_health = 0
+        end
         character.update!(health: total_health%character.unit_health, units: units)
     end
 end
