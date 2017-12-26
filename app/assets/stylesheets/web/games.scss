@@ -17,19 +17,21 @@
     border-top: 1px solid #000;
     vertical-align: top;
 
-    &.selected {
-        background: #eee;
-    }
+
 
     &.disabled {
-        background: red;
+        background: #EF7E82;
     }
 
     &.character {
-        background: green;
+        background: #C4D3B0;
+
+        &.selected {
+            background: #6D8673;
+        }
 
         &.opponent {
-            background: blue;
+            background: #6AA8AC;
         }
     }
 
