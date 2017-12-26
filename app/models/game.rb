@@ -17,7 +17,7 @@ class Game < ApplicationRecord
             raise Exceptions::BadRequest.new "Distance between #{last_tile.inspect} to #{tile.inspect} is #{distance}, must be 1" unless distance == 1
             raise Exceptions::BadRequest.new "Character unable to walk on #{tile.inspect}" if Character.movement_types[character.movement_type] == Character.movement_types[:ground] && !tile.walkable
 
-            speed_left++;
+            speed_left = speed_left+1
             last_tile = tile
         end
         raise Exceptions::BadRequest.new "Destination must be a walkable tile" unless last_tile.walkable
