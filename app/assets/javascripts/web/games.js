@@ -30,6 +30,15 @@ class Api  {
             callback(data.character);
         });
     }
+
+    finish(character, callback) {
+        $.ajax({
+            url: `http://127.0.0.1:3000/api/v1/games/${this.game.id}/characters/${character}/finish`,
+            method: 'put',
+        }).done(data => {
+            callback(data.game);
+        });
+    }
 }
 
 class Utils {

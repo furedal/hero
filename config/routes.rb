@@ -10,6 +10,7 @@ Rails.application.routes.draw do
             resources :characters, only: [:index]
             resources :games, only: [:index, :show] do
                 member do
+                    put    'characters/:character_id/finish',         to: 'games#finish_turn'
                     put    'characters/:character_id/move',           to: 'games#move_character'
                     put    'characters/:character_id/attack',         to: 'games#attack_character'
                 end

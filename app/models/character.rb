@@ -14,5 +14,14 @@ class Character < ApplicationRecord
             total_health = 0
         end
         character.update!(health: total_health%character.unit_health, units: units)
+        self.update(attacked: true)
+    end
+
+    def turn_reset
+        self.update(attacked: false, moved: false)
+    end
+
+    def game_reset(game_turn)
+        self.update(attacked: false, moved: false, health: self.unit_health, game_turn: game_turn)
     end
 end

@@ -4,8 +4,17 @@ class Game < ApplicationRecord
     has_many :characters, through: :teams
 
     after_create :generate_tiles
-    after_create :reset_characters
     after_create :position_teams
+    after_create :order_characters
+
+    def finish_turn
+        current_character.turn_reset
+        if self.characters.exists?(game_turn: self.character_turn + 1)
+            self.update(character_turn: self.character_turn + 1)
+        else
+            self.update(character_turn: 0)
+        end
+    end
 
     def move_character(character,  path)
         last_tile = character.tile
@@ -17,11 +26,11 @@ class Game < ApplicationRecord
             raise Exceptions::BadRequest.new "Distance between #{last_tile.inspect} to #{tile.inspect} is #{distance}, must be 1" unless distance == 1
             raise Exceptions::BadRequest.new "Character unable to walk on #{tile.inspect}" if Character.movement_types[character.movement_type] == Character.movement_types[:ground] && !tile.walkable
 
-            speed_left = speed_left+1
+            speed_left = speed_left-1
             last_tile = tile
         end
         raise Exceptions::BadRequest.new "Destination must be a walkable tile" unless last_tile.walkable
-        character.update(tile: last_tile)
+        character.update(moved: true, tile: last_tile)
     end
 
     def generate_tiles
@@ -32,9 +41,10 @@ class Game < ApplicationRecord
         end
     end
 
-    def reset_characters
-        self.characters.each do |c|
-            c.update(health: c.unit_health)
+    def order_characters
+        shuffled = self.characters.shuffle
+        shuffled.each_with_index do |c, index|
+            c.game_reset(index)
         end
     end
 
@@ -53,5 +63,9 @@ class Game < ApplicationRecord
             right_tiles = right_tiles - [tile]
             character.update!(tile: tile)
         end
+    end
+
+    def current_character
+        self.characters.find_by(game_turn: self.character_turn)
     end
 end

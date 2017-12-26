@@ -24,9 +24,13 @@ class Init < ActiveRecord::Migration[5.1]
 			t.integer :power
 			t.integer :units
 			t.integer :unit_health
-			t.integer :health
 			t.integer :speed
 			t.integer :movement_type
+
+			t.integer :game_turn
+			t.integer :health
+			t.boolean :moved
+			t.boolean :attacked
 
 			t.references :tile
 		end
