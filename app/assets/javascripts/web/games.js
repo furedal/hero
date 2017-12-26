@@ -46,8 +46,9 @@ class Utils {
         return Math.abs(tile1.x_position - tile2.x_position) + Math.abs(tile1.y_position - tile2.y_position);
     }
 
-    static findReachableTiles(tiles, character) {
-        const possibleReachableTiles = tiles.filter(tile => tile.id != character.tile.id
+    static findReachableTiles(tiles, character, occupiedTiles) {
+        const occupiedTileIds = occupiedTiles.map(t => t.id);
+        const possibleReachableTiles = tiles.filter(tile => !occupiedTileIds.includes(tile.id)
             && Utils.distanceToTile(character.tile, tile) <= character.speed
             && (tile.walkable || character.movement_type !== 'ground'));
 
@@ -62,17 +63,12 @@ class Game {
         this.$canvas = $(canvas);
         this.api.getGame(gameId, game => {
             this.game = game;
+            this.characters = [];
+            this.game.teams.forEach(t => {
+                this.characters = this.characters.concat(t.characters);
+            });
             this.initGame();
         });
-    }
-
-    getCharacter(id) {
-        let character = null;
-        this.game.teams.some(t => {
-            character = t.characters.find(c => c.id == id);
-            return character != null;
-        });
-        return character;
     }
 
     initGame() {
@@ -116,12 +112,15 @@ class Game {
         if (!this.selectedCharacter) {
             if (!tile.hasClass('opponent')) {
                 // Select character
+                this.$canvas.find('.tile.selected').removeClass('selected');
+                tile.addClass('selected');
                 this.selectedCharacter = tile.attr('data-character-id');
-                this.drawReachableTiles(this.getCharacter(this.selectedCharacter));
+                this.drawReachableTiles(this.characters.find(c => c.id == this.selectedCharacter));
             }
         } else if (this.selectedCharacter == tile.attr('data-character-id')) {
             // Deselect character
             this.clearReachableTiles();
+            tile.removeClass('selected');
             this.selectedCharacter = null;
         } else if (tile.attr('data-character-id')) {
             // Attack
@@ -130,6 +129,7 @@ class Game {
                 this.redrawCanvas();
             });
             this.selectedCharacter = null;
+            this.$canvas.find('.tile.selected').removeClass('selected');
         } else {
             // Move
             this.api.move(this.selectedCharacter, this.game.tiles.find(t => t.id == tile.attr('data-id')), character => {
@@ -137,6 +137,7 @@ class Game {
                 this.redrawCanvas();
             });
             this.selectedCharacter = null;
+            this.$canvas.find('.tile.selected').removeClass('selected');
         }
     }
 
@@ -171,6 +172,9 @@ class Game {
             }
             return false;
         });
+
+        const cIndex = this.characters.findIndex(c => c.id == character.id);
+        this.characters[cIndex] = characters;
     }
 
 
@@ -180,7 +184,7 @@ class Game {
 
     drawReachableTiles(character) {
         this.clearReachableTiles();
-        const tiles = Utils.findReachableTiles(this.game.tiles, character);
+        const tiles = Utils.findReachableTiles(this.game.tiles, character, this.characters.map(c => c.tile));
         tiles.forEach(tile => {
             this.$canvas.find(`.tile[data-id=${tile.id}]`).addClass('reachable');
         });
