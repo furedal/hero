@@ -1,0 +1,34 @@
+# SQLite version 3.x
+#   gem install sqlite3
+#
+#   Ensure the SQLite 3 gem is defined in your Gemfile
+#   gem 'sqlite3'
+#
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  host: localhost
+
+development:
+  <<: *default
+  database: hero_dev
+  user: postgres
+  password: hej
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  database: hero_test
+  user: postgres
+  password: hej
+
+production:
+  <<: *default
+  database: <%= ENV['HERO_DATABASE_NAME'] %>
+  username: <%= ENV['HERO_DATABASE_USERNAME'] %>
+  password: <%= ENV['HERO_DATABASE_PASSWORD'] %>
+  host: <%= ENV['HERO_DATABASE_HOST'] %>
